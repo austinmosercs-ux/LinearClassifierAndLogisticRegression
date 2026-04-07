@@ -1,9 +1,25 @@
 # Homework 5 - Linear Classifier and Logistic Regression
 # CSCI 405/CIS 605 Artificial Intelligence
+#
+# Implements and compares two binary classification approaches trained
+# with online (per-sample) gradient descent on a small 2-feature dataset:
+#
+#   Part 1 - Linear Classifier with Hard Threshold:
+#     Uses a step activation (output = 1 if net >= 0.5 else 0).
+#     Weight update rule:  w_i += lr * (y - y_hat) * x_i
+#
+#   Part 2 - Logistic Regression:
+#     Uses the sigmoid activation so the output is a probability in (0, 1).
+#     Weight update rule (generalized delta):  w_i += lr * delta * x_i
+#       where delta = (y - sigma(net)) * sigma(net) * (1 - sigma(net))
+#
+# Both parts share the same learning rate, convergence threshold, and
+# initial weights so the results are directly comparable.
 
 import math
 
-# training data [X1, X2, Y]
+# Training data rows: [X1, X2, Y]
+# Y=1 denotes the positive class, Y=0 the negative class.
 data = [
     [1,   6,   1],
     [1.5, 7,   1],
@@ -17,12 +33,14 @@ data = [
     [6.5, 8.5, 0]
 ]
 
-# test samples
+# Four points used to evaluate the trained decision boundary,
+# including an extreme point (20, 100) to test extrapolation.
 test_samples = [(1, 8), (2, 1.5), (9, 5), (20, 100)]
 
-learning_rate = 0.001
-MAX_ITER = 10000000
-THRESHOLD = 1e-10
+# Hyperparameters shared by both classifiers.
+learning_rate = 0.001   # step size for each weight update
+MAX_ITER = 10000000     # hard cap on training epochs to prevent infinite loops
+THRESHOLD = 1e-10       # convergence criterion: max weight change per epoch
 
 # -------------------------------------------------------
 # Part 1: Linear Classifier with Hard Threshold
@@ -115,6 +133,7 @@ print("Part 2: Logistic Regression Classifier")
 print("=" * 55)
 
 def sigmoid(z):
+    """Logistic sigmoid: maps any real number to the open interval (0, 1)."""
     return 1.0 / (1.0 + math.exp(-z))
 
 # reset initial weights
@@ -147,6 +166,7 @@ for i in range(MAX_ITER):
         w1 = w1 + learning_rate * delta * x1
         w2 = w2 + learning_rate * delta * x2
 
+    # Same L-inf convergence check as Part 1.
     diff = max(abs(w0 - prev_w0), abs(w1 - prev_w1), abs(w2 - prev_w2))
     if diff < THRESHOLD:
         print(f"Converged after {i + 1} iterations")
